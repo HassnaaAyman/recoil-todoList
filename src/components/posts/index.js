@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { getPosts } from '../../infrastructur/api/fetchPosts'
-const Posts = ()=>{
-    const [posts , setPosts] = useState({})
-
-    useEffect(()=>{
-        const fetchData = async ()=>{
-            const setDatatoStorage = await getPosts()
-            localStorage.setItem('post' ,JSON.stringify(setDatatoStorage.data))
-        }
-        const getDataFromStorage = ()=>{
-            const dataFromStorage = localStorage.getItem('post')
-            setPosts(JSON.parse(dataFromStorage))
-        }
-        fetchData()
-        getDataFromStorage()
-    }, [])
+import {selector, useRecoilValue} from 'recoil'
 
 
- 
+const fetchData = selector({
+    key : 'getPostTitle',
+    get : async ({get}) =>{        
+        const response = await getPosts()
+        return response.data
+    }
+})
+
+const GetPostTitle = () =>{
+    const title = useRecoilValue(fetchData)       
+         return <>{Object.keys(title).map(key=><p key={title[key].id}>{title[key].title}</p>)}</>
+     
     
+}
+
+const Posts = ()=>{
     return (
-    <>{posts.title}</>
+        <React.Suspense fallback={<div>loading......</div>}>
+            <GetPostTitle/>
+        </React.Suspense>
     )
 }
 
